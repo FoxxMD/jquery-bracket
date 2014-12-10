@@ -23,7 +23,7 @@ interface TeamBlock {
   name: string;
   id: number;
   idx: number;
-  score: number;
+  score: any;
 }
 
 interface MatchIndicator {
@@ -107,6 +107,12 @@ interface Options {
   function isNumber(n: any): boolean {
     return !isNaN(parseFloat(n)) && isFinite(n);
   }
+  function isBoolean(n: string): boolean {
+    return n == "true" || n == "false";
+  }
+  function toBoolean(n: string): boolean {
+    return n == "true";
+  }
 
   function depth(a): number {
     function df(a, d: number): number {
@@ -135,6 +141,13 @@ interface Options {
       else if (match.a.score < match.b.score)
         return [match.b, match.a]
     }
+    else if(isBoolean(match.a.score) && isBoolean(match.b.score)){
+      if(toBoolean(match.a.score))
+        return [match.a, match.b];
+      else
+        return [match.b, match.a];
+    }
+
     return []
   }
 
