@@ -1095,7 +1095,7 @@ interface Options {
                 throw 'match size not valid'
               }
               /*logical xor*/
-              if (!(isNumber(ma[0]) ? isNumber(ma[1]) : !isNumber(ma[1]))) {
+              if (!((isNumber(ma[0]) || isBoolean(ma[0])) ? (isNumber(ma[1]) || isBoolean(ma[0])) : !(isNumber(ma[1]) || isBoolean(ma[0])))) {
                 console.log('mixed results', ma)
                 throw 'mixed results'
               }
