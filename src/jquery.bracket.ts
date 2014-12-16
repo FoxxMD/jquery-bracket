@@ -78,6 +78,7 @@ interface Bracket {
 interface MatchResult {
   a: TeamBlock;
   b: TeamBlock;
+  extId: number;
 }
 
 interface DoneCallback {
@@ -92,7 +93,7 @@ interface Decorator {
 interface Options {
   el: JQuery;
   init: any;
-  save: (data: any, userData: any) => void;
+  save: (data: any, userData: any, returnData: any) => void;
   userData: any;
   decorator: Decorator;
   skipConsolationRound: boolean;
@@ -764,7 +765,7 @@ interface Options {
 
     var topCon = $('<div class="jQBracket ' + opts.dir + '"></div>').appendTo(opts.el.empty())
 
-    function renderAll(save: boolean): void {
+    function renderAll(save: boolean, returnData?: any): void {
       resultIdentifier = 0
       w.render()
       if (l && f) {
@@ -780,13 +781,13 @@ interface Options {
           data.results[2] = f.results()
         }
         if (opts.save)
-          opts.save(data, opts.userData)
+          opts.save(data, opts.userData, returnData)
       }
     }
 
     function mkMatch(round: Round, data: Array<TeamBlock>, idx: number,
                      results, renderCb: Function): Match {
-      var match: MatchResult = {a: data[0], b: data[1]}
+      var match: MatchResult = {a: data[0], b: data[1], extId: results != undefined ? results[2] || null : null}
       function teamElement(round: number, team: TeamBlock, isReady: boolean) {
         var rId = resultIdentifier
         var sEl = $('<div class="score" data-resultid="result-' + rId + '"></div>')
@@ -895,7 +896,12 @@ interface Options {
                   span.html(val)
                   if (isNumber(val) && score !== parseInt(val, 10)) {
                     team.score = parseInt(val, 10)
-                    renderAll(true)
+                    var returnData = {
+                      team: team.name,
+                      score: team.score,
+                      matchId: match.extId
+                    }
+                    renderAll(true, returnData)
                   }
                   span.click(editor)
                 })
@@ -932,6 +938,8 @@ interface Options {
 
       match.a.score = !results ? null : results[0]
       match.b.score = !results ? null : results[1]
+
+      match.extId = !results ? null : results[2]
 
       /* match has score even though teams haven't yet been decided */
       /* todo: would be nice to have in preload check, maybe too much work */
@@ -1033,6 +1041,7 @@ interface Options {
           this.el.css('height', (round.bracket.el.height() / round.size()) + 'px');
           teamCon.css('top', (this.el.height() / 2 - teamCon.height() / 2) + 'px');
 
+
           /* todo: move to class */
           if (alignCb)
             alignCb(teamCon)
@@ -1045,7 +1054,7 @@ interface Options {
             this.connect(connectorCb)
         },
         results: function() {
-          return [match.a.score, match.b.score]
+          return [match.a.score, match.b.score, match.extId]
         }
       }
     }
